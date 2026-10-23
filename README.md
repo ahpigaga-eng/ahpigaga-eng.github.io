@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>星核守護者：最後曙光 (Core Sentinel: Last Dawn)</title>
-    
+    <!DOCTYPE html>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -510,7 +510,8 @@
 
             // 道具
             autoAimTime: 0,
-            slowDownTime: 0
+            slowDownTime: 0,
+            infiniteHeatTime: 0
         };
 
         let acquiredLuckyUpgrades = new Set();
@@ -682,10 +683,24 @@
             if (gameState !== 'PLAYING' || player.empCd > 0) return;
             player.empCd = player.empMaxCd;
             audioManager.playExplosion();
-            enemies.forEach(enemy => {
+            
+            // 修復 E 鍵技能：給予 EMP 傷害並檢測擊殺與更新 HUD
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
                 const dist = Math.hypot(enemy.x - player.x, enemy.y - player.y);
-                if (dist < 400) enemy.hp -= 300;
-            });
+                if (dist < 400) {
+                    enemy.hp -= 300;
+                    if (enemy.hp <= 0) {
+                        player.score += enemy.scoreValue;
+                        player.credits += Math.floor(enemy.scoreValue / 10);
+                        player.kills++;
+                        gainExp(enemy.expValue);
+                        enemies.splice(i, 1);
+                    }
+                }
+            }
+            updateHUD();
+
             for (let i = 0; i < 60; i++) {
                 const angle = (Math.PI * 2 / 60) * i;
                 particles.push(new Particle(player.x, player.y, '#ec4899', 6, 8, Math.cos(angle) * 10, Math.sin(angle) * 10));
@@ -716,10 +731,50 @@
                 this.y = Math.random() * (canvas.height - 120) + 60;
                 this.radius = 16;
                 this.type = type; 
-                this.color = type === 'autoAim' ? '#eab308' : type === 'slowDown' ? '#3b82f6' : '#22c55e';
+                this.duration = 40000; // 道具場上存活時間：40 秒 (毫秒)
+                this.lifeTimer = 0;
+
+                // 道具種類與顏色樣式
+                switch(type) {
+                    case 'autoAim':
+                        this.color = '#eab308'; // 黃色
+                        this.icon = '🎯';
+                        break;
+                    case 'slowDown':
+                        this.color = '#3b82f6'; // 藍色
+                        this.icon = '❄️';
+                        break;
+                    case 'heal':
+                        this.color = '#22c55e'; // 綠色
+                        this.icon = '❤️';
+                        break;
+                    case 'shield':
+                        this.color = '#06b6d4'; // 青色
+                        this.icon = '🛡️';
+                        break;
+                    case 'nuke':
+                        this.color = '#ef4444'; // 紅色
+                        this.icon = '💣';
+                        break;
+                    case 'instantCool':
+                        this.color = '#f97316'; // 橘色
+                        this.icon = '⚡';
+                        break;
+                }
+            }
+
+            update(dt) {
+                this.lifeTimer += dt;
+                return this.lifeTimer >= this.duration; // 超過 40 秒返回 true (銷毀)
             }
 
             draw() {
+                const timeLeft = this.duration - this.lifeTimer;
+                // 當時間小於 10 秒時，開始閃爍提醒
+                if (timeLeft < 10000 && Math.floor(Date.now() / 200) % 2 === 0) {
+                    return;
+                }
+
                 ctx.save();
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = this.color;
@@ -730,6 +785,12 @@
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 2;
                 ctx.stroke();
+
+                // 繪製道具圖標
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.icon, this.x, this.y);
                 ctx.restore();
             }
         }
@@ -851,6 +912,8 @@
             player.bulletDamage = hero.bulletDamage;
             player.bulletSpeed = hero.bulletSpeed;
             player.fireRate = hero.fireRate;
+            player.multishot = 1; // 重置多重彈幕數量
+            player.knockback = 6;
             player.shield = 0;
             player.level = 1;
             player.exp = 0;
@@ -860,8 +923,8 @@
             player.kills = 0;
             player.dashCd = 0;
             player.empCd = 0;
-            player.is360Shot = false;
-            player.gravityBullet = false;
+            player.is360Shot = false; // 重置 360 度散射
+            player.gravityBullet = false; // 重置黑洞引力彈
             player.heatMult = 1.0;
             player.continuousFireTime = 0;
             player.isOverheated = false;
@@ -869,8 +932,9 @@
             player.mustReleaseTrigger = false;
             player.autoAimTime = 0;
             player.slowDownTime = 0;
+            player.infiniteHeatTime = 0;
 
-            acquiredLuckyUpgrades.clear();
+            acquiredLuckyUpgrades.clear(); // 清空幸運升級紀錄
             bullets = [];
             enemies = [];
             particles = [];
@@ -978,6 +1042,7 @@
 
             if (player.autoAimTime > 0) player.autoAimTime = Math.max(0, player.autoAimTime - dt);
             if (player.slowDownTime > 0) player.slowDownTime = Math.max(0, player.slowDownTime - dt);
+            if (player.infiniteHeatTime > 0) player.infiniteHeatTime = Math.max(0, player.infiniteHeatTime - dt);
 
             const buffContainer = document.getElementById('buffContainer');
             let buffHTML = '';
@@ -986,6 +1051,9 @@
             }
             if (player.slowDownTime > 0) {
                 buffHTML += `<div class="glass-panel px-3 py-1 rounded-full border border-blue-500/60 text-blue-300 font-orbitron text-xs flex items-center gap-1.5"><i class="fa-solid fa-snowflake"></i> 全域緩速 (${(player.slowDownTime/1000).toFixed(1)}s)</div>`;
+            }
+            if (player.infiniteHeatTime > 0) {
+                buffHTML += `<div class="glass-panel px-3 py-1 rounded-full border border-orange-500/60 text-orange-300 font-orbitron text-xs flex items-center gap-1.5"><i class="fa-solid fa-bolt"></i> 無限射擊 (${(player.infiniteHeatTime/1000).toFixed(1)}s)</div>`;
             }
             buffContainer.innerHTML = buffHTML;
 
@@ -1014,10 +1082,12 @@
                     }
                 } else if (isMouseDown) {
                     if (!player.mustReleaseTrigger) {
-                        player.continuousFireTime += dt * player.heatMult;
+                        if (player.infiniteHeatTime <= 0) {
+                            player.continuousFireTime += dt * player.heatMult;
+                        }
                         shootBullet();
                         overheatContainer.style.opacity = '1';
-                        overheatTitle.innerHTML = `<i class="fa-solid fa-temperature-full"></i> <span>槍管熱能</span>`;
+                        overheatTitle.innerHTML = player.infiniteHeatTime > 0 ? `<i class="fa-solid fa-bolt text-orange-400 animate-bounce"></i> <span class="text-orange-300">無限散熱中</span>` : `<i class="fa-solid fa-temperature-full"></i> <span>槍管熱能</span>`;
                         overheatBar.style.width = Math.min(100, (player.continuousFireTime / player.maxContinuousFire * 100)) + '%';
 
                         if (player.continuousFireTime >= player.maxContinuousFire) {
@@ -1055,21 +1125,60 @@
             player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x + moveX * currentSpeed));
             player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y + moveY * currentSpeed));
 
-            // 地圖道具生成
+            // 地圖道具生成 (每 15 秒生成一個)
             itemSpawnTimer += dt;
-            if (itemSpawnTimer >= 30000) {
+            if (itemSpawnTimer >= 15000) {
                 itemSpawnTimer = 0;
-                const itemTypes = ['autoAim', 'slowDown', 'heal'];
+                const itemTypes = ['autoAim', 'slowDown', 'heal', 'shield', 'nuke', 'instantCool'];
                 items.push(new Item(itemTypes[Math.floor(Math.random() * itemTypes.length)]));
             }
 
+            // 道具更新與逾時 40 秒清除
             for (let i = items.length - 1; i >= 0; i--) {
                 const item = items[i];
+                const isExpired = item.update(dt);
+
+                if (isExpired) {
+                    items.splice(i, 1);
+                    continue;
+                }
+
+                // 拾取道具邏輯
                 if (Math.hypot(player.x - item.x, player.y - item.y) < player.radius + item.radius) {
                     audioManager.playPowerup();
-                    if (item.type === 'autoAim') player.autoAimTime = 10000;
-                    else if (item.type === 'slowDown') player.slowDownTime = 10000;
-                    else if (item.type === 'heal') { player.hp = player.maxHp; updateHUD(); }
+                    if (item.type === 'autoAim') {
+                        player.autoAimTime = 10000;
+                    } else if (item.type === 'slowDown') {
+                        player.slowDownTime = 10000;
+                    } else if (item.type === 'heal') {
+                        player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.5);
+                        updateHUD();
+                    } else if (item.type === 'shield') {
+                        player.shield++;
+                        updateHUD();
+                    } else if (item.type === 'nuke') {
+                        // 核爆：殺傷全場敵人並正確認算擊殺與血量更新
+                        audioManager.playExplosion();
+                        for (let i = enemies.length - 1; i >= 0; i--) {
+                            const e = enemies[i];
+                            e.hp -= 800;
+                            if (e.hp <= 0) {
+                                player.score += e.scoreValue;
+                                player.credits += Math.floor(e.scoreValue / 10);
+                                player.kills++;
+                                gainExp(e.expValue);
+                                enemies.splice(i, 1);
+                            }
+                        }
+                        updateHUD();
+                        for (let k = 0; k < 50; k++) {
+                            particles.push(new Particle(canvas.width / 2, canvas.height / 2, '#ef4444', 8, 12));
+                        }
+                    } else if (item.type === 'instantCool') {
+                        player.continuousFireTime = 0;
+                        player.isOverheated = false;
+                        player.infiniteHeatTime = 5000;
+                    }
                     items.splice(i, 1);
                 }
             }
@@ -1422,15 +1531,15 @@
             ctx.lineTo(player.x + Math.cos(aimAngle) * 28, player.y + Math.sin(aimAngle) * 28);
             ctx.stroke();
             ctx.restore();
-
-            // 繪製子彈
+            
+ // 繪製子彈
             bullets.forEach(b => {
                 ctx.save();
                 ctx.shadowBlur = b.isGravity ? 15 : 8;
                 ctx.shadowColor = b.color;
                 ctx.fillStyle = b.color;
                 ctx.beginPath();
-                  ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
             });
