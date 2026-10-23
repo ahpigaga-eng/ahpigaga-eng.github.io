@@ -3,8 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>星核守護者：最後曙光 (Core Sentinel: Last Dawn)</title>
-    <!DOCTYPE html>
-    <!-- Tailwind CSS -->
+  <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
