@@ -3,7 +3,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>星核守護者：最後曙光 (Core Sentinel: Last Dawn)</title>
-  <!-- Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -182,6 +182,83 @@
             <button id="btnAudio" class="glass-panel w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-purple-400 hover:bg-purple-500/20 border border-purple-500/40 transition-all active:scale-95">
                 <i id="audioIcon" class="fa-solid fa-volume-high text-lg"></i>
             </button>
+        </div>
+    </div>
+
+    <!-- 暫停選單 Modal -->
+    <div id="pauseModal" class="absolute inset-0 z-30 hidden flex items-center justify-center bg-black/80 backdrop-blur-md">
+        <div class="glass-panel max-w-sm w-full mx-4 p-6 sm:p-8 rounded-3xl border border-cyan-500/50 glow-cyan text-center flex flex-col gap-5">
+            <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 border border-cyan-500/50 flex items-center justify-center text-cyan-400 text-3xl mx-auto shadow-lg shadow-cyan-500/30">
+                <i class="fa-solid fa-pause"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black font-orbitron text-cyan-400 mb-1">對戰暫停</h2>
+                <p class="text-xs uppercase tracking-widest text-gray-400 font-orbitron">GAME PAUSED</p>
+            </div>
+            <div class="flex flex-col gap-3">
+                <button id="btnResumeGame" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-orbitron font-bold text-sm tracking-wider cyber-btn shadow-lg shadow-cyan-500/30">
+                    繼續對戰 (RESUME)
+                </button>
+                <button id="btnQuitToMenu" class="w-full py-3.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-300 font-orbitron font-bold text-sm tracking-wider cyber-btn">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> 放棄對戰 (RETURN TO MENU)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 開發者測試控制台 (Developer Console Modal/Panel) -->
+    <div id="devConsoleModal" class="absolute inset-0 z-40 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="glass-panel max-w-2xl w-full p-6 sm:p-8 rounded-3xl border border-yellow-500/60 glow-yellow flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-yellow-500/30 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-terminal text-yellow-400 text-xl"></i>
+                    <h2 class="text-xl font-black font-orbitron text-yellow-400">開發者全能測試面板 (DEV CONSOLE)</h2>
+                </div>
+                <button id="btnCloseDev" class="text-gray-400 hover:text-white text-xl p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- 金錢與數值 -->
+                <button id="devUnlockAllHeroes" class="py-2.5 px-4 rounded-xl bg-yellow-500/20 hover:bg-yellow-500/40 border border-yellow-500/50 text-yellow-200 font-orbitron text-xs font-bold text-left flex items-center justify-between">
+                    <span><i class="fa-solid fa-unlock mr-2"></i>解鎖全角色 + 99999 星幣</span>
+                    <i class="fa-solid fa-check text-xs"></i>
+                </button>
+                <button id="devMaxStats" class="py-2.5 px-4 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/50 text-cyan-200 font-orbitron text-xs font-bold text-left flex items-center justify-between">
+                    <span><i class="fa-solid fa-bolt mr-2"></i>滿級 (LVL 99) + 99999 戰術點</span>
+                    <i class="fa-solid fa-check text-xs"></i>
+                </button>
+
+                <!-- 戰鬥能力與無敵 -->
+                <button id="devGodMode" class="py-2.5 px-4 rounded-xl bg-red-500/20 hover:bg-red-500/40 border border-red-500/50 text-red-200 font-orbitron text-xs font-bold text-left flex items-center justify-between">
+                    <span><i class="fa-solid fa-shield-heart mr-2"></i>上帝無敵模式 (HP 99999)</span>
+                    <span id="godModeStateTag" class="text-[10px] bg-gray-800 px-1.5 py-0.5 rounded">OFF</span>
+                </button>
+                <button id="devAllUpgrades" class="py-2.5 px-4 rounded-xl bg-purple-500/20 hover:bg-purple-500/40 border border-purple-500/50 text-purple-200 font-orbitron text-xs font-bold text-left flex items-center justify-between">
+                    <span><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>獲得全數天賦與幸運模組</span>
+                    <i class="fa-solid fa-check text-xs"></i>
+                </button>
+
+                <!-- 技能與狀態 -->
+                <button id="devInfiniteCool" class="py-2.5 px-4 rounded-xl bg-orange-500/20 hover:bg-orange-500/40 border border-orange-500/50 text-orange-200 font-orbitron text-xs font-bold text-left flex items-center justify-between">
+                    <span><i class="fa-solid fa-fire-burner mr-2"></i>無限射擊不降速/不熱能</span>
+                    <i class="fa-solid fa-check text-xs"></i>
+                </button>
+                <button id="devClearEnemies" class="py-2.5 px-4 rounded-xl bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/50 text-pink-200 font-orbitron text-xs font-bold text-left flex items-center justify-between">
+                    <span><i class="fa-solid fa-skull-crossbones mr-2"></i>一鍵消滅全場敵軍</span>
+                    <i class="fa-solid fa-burst text-xs"></i>
+                </button>
+            </div>
+
+            <!-- 關卡跳轉 -->
+            <div class="flex flex-col gap-2 border-t border-gray-800 pt-3">
+                <label class="text-xs font-orbitron text-gray-300 font-bold">跳轉至指定波次 (WAVE 1~10):</label>
+                <div class="flex gap-2">
+                    <input id="devWaveInput" type="number" min="1" max="10" value="1" class="bg-gray-900 border border-gray-700 text-white font-orbitron text-sm rounded-xl px-3 py-1.5 w-24">
+                    <button id="devSetWave" class="py-1.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-orbitron text-xs font-bold">設置波次</button>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-gray-400 italic">提示：在遊戲中隨時按下 <kbd class="bg-gray-800 px-1 py-0.5 rounded text-yellow-400">~</kbd> 鍵也可以直接切換開發者控制台！</p>
         </div>
     </div>
 
@@ -467,7 +544,7 @@
         let gameState = 'MENU';
         let mousePos = { x: canvas.width / 2, y: canvas.height / 2 };
         let keys = {};
-        let isMouseDown = false; 
+        let isMouseDown = false;
 
         // 玩家物件數據
         let player = {
@@ -483,6 +560,10 @@
             nextExp: 100,
             score: 0,
             credits: 0,
+            creditMult: 1.0,
+            maxTurretBonus: 0,
+            lifesteal: 0,
+            bulletSizeMult: 1.0,
             kills: 0,
             fireRate: 150,
             lastFire: 0,
@@ -531,6 +612,7 @@
             if (e.code === 'Space') useDash();
             if (e.code === 'KeyE') useEMP();
             if (e.code === 'KeyQ') buildTurret();
+            if (e.code === 'Escape') togglePauseModal();
         });
 
         window.addEventListener('keyup', (e) => {
@@ -653,9 +735,30 @@
             gameState = 'MENU';
         });
 
-        document.getElementById('btnPause').addEventListener('click', () => {
-            if (gameState === 'PLAYING') gameState = 'PAUSED';
-            else if (gameState === 'PAUSED') gameState = 'PLAYING';
+        function togglePauseModal() {
+            if (gameState === 'PLAYING') {
+                gameState = 'PAUSED';
+                document.getElementById('pauseModal').classList.remove('hidden');
+            } else if (gameState === 'PAUSED') {
+                gameState = 'PLAYING';
+                document.getElementById('pauseModal').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('btnPause').addEventListener('click', togglePauseModal);
+
+        document.getElementById('btnResumeGame').addEventListener('click', () => {
+            gameState = 'PLAYING';
+            document.getElementById('pauseModal').classList.add('hidden');
+        });
+
+        document.getElementById('btnQuitToMenu').addEventListener('click', () => {
+            document.getElementById('pauseModal').classList.add('hidden');
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('skillBar').classList.add('hidden');
+            document.getElementById('startModal').classList.remove('hidden');
+            renderHeroCards();
+            gameState = 'MENU';
         });
 
         document.getElementById('btnAudio').addEventListener('click', () => {
@@ -691,7 +794,7 @@
                     enemy.hp -= 300;
                     if (enemy.hp <= 0) {
                         player.score += enemy.scoreValue;
-                        player.credits += Math.floor(enemy.scoreValue / 10);
+                        player.credits += Math.floor(enemy.scoreValue * player.creditMult / 10);
                         player.kills++;
                         gainExp(enemy.expValue);
                         enemies.splice(i, 1);
@@ -708,8 +811,9 @@
 
         function buildTurret() {
             const hero = HEROES[selectedHeroId];
+            const maxTurrets = hero.maxTurrets + player.maxTurretBonus;
             if (gameState !== 'PLAYING' || player.credits < 50) return;
-            if (turrets.length >= hero.maxTurrets) return;
+            if (turrets.length >= maxTurrets) return;
 
             player.credits -= 50;
             turrets.push({
@@ -919,6 +1023,10 @@
             player.nextExp = 100;
             player.score = 0;
             player.credits = 0;
+            player.creditMult = 1.0;
+            player.maxTurretBonus = 0;
+            player.lifesteal = 0;
+            player.bulletSizeMult = 1.0;
             player.kills = 0;
             player.dashCd = 0;
             player.empCd = 0;
@@ -973,6 +1081,7 @@
             }
 
             const baseDamage = player.bulletDamage;
+            const bRadius = (player.gravityBullet ? 7 : (hero.id === 'tank' ? 8 : 4)) * player.bulletSizeMult;
 
             if (player.is360Shot) {
                 const count = 12;
@@ -987,7 +1096,7 @@
                         vy: Math.sin(a) * player.bulletSpeed,
                         damage: baseDamage,
                         maxRange: hero.range,
-                        radius: 5,
+                        radius: bRadius,
                         color: hero.color,
                         isAutoAim: player.autoAimTime > 0,
                         isGravity: player.gravityBullet
@@ -1009,7 +1118,7 @@
                         vy: Math.sin(currentAngle) * player.bulletSpeed,
                         damage: baseDamage,
                         maxRange: hero.range,
-                        radius: player.gravityBullet ? 7 : (hero.id === 'tank' ? 8 : 4),
+                        radius: bRadius,
                         color: hero.color,
                         isAutoAim: player.autoAimTime > 0,
                         isGravity: player.gravityBullet
@@ -1163,7 +1272,7 @@
                             e.hp -= 800;
                             if (e.hp <= 0) {
                                 player.score += e.scoreValue;
-                                player.credits += Math.floor(e.scoreValue / 10);
+                                player.credits += Math.floor(e.scoreValue * player.creditMult / 10);
                                 player.kills++;
                                 gainExp(e.expValue);
                                 enemies.splice(i, 1);
@@ -1314,8 +1423,11 @@
                         if (enemy.hp <= 0) {
                             audioManager.playExplosion();
                             player.score += enemy.scoreValue;
-                            player.credits += Math.floor(enemy.scoreValue / 10);
+                            player.credits += Math.floor(enemy.scoreValue * player.creditMult / 10);
                             player.kills++;
+                            if (player.lifesteal > 0) {
+                                player.hp = Math.min(player.maxHp, player.hp + player.lifesteal);
+                            }
                             gainExp(enemy.expValue);
                             enemies.splice(i, 1);
                             break;
@@ -1355,6 +1467,7 @@
 
         function updateHUD() {
             const hero = HEROES[selectedHeroId];
+            const maxTurrets = hero.maxTurrets + player.maxTurretBonus;
             document.getElementById('playerLevel').innerText = player.level;
             document.getElementById('hpText').innerText = `${Math.ceil(player.hp)} / ${player.maxHp}`;
             document.getElementById('hpBar').style.width = Math.max(0, (player.hp / player.maxHp * 100)) + '%';
@@ -1377,11 +1490,11 @@
 
             const turretTag = document.getElementById('turretCountTag');
             const turretBtn = document.getElementById('btnBuildTurret');
-            turretTag.innerText = `${turrets.length} / ${hero.maxTurrets} (50pt)`;
+            turretTag.innerText = `${turrets.length} / ${maxTurrets} (50pt)`;
             
-            if (turrets.length >= hero.maxTurrets) {
+            if (turrets.length >= maxTurrets) {
                 turretBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                turretTag.innerText = `已達上限 (${hero.maxTurrets})`;
+                turretTag.innerText = `已達上限 (${maxTurrets})`;
             } else {
                 turretBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
@@ -1398,20 +1511,26 @@
                 { id: 'firerate', title: '射擊速率 +25%', desc: '提升連發與冷卻速度', lucky: false, action: () => { player.fireRate = Math.max(50, player.fireRate * 0.75); } },
                 { id: 'damage', title: '星核加壓 (+30% 傷害)', desc: '提升基礎子彈殺傷力', lucky: false, action: () => { player.bulletDamage *= 1.3; } },
                 { id: 'shield', title: '能量護盾矩陣 (+2 層)', desc: '獲得 2 層抵擋敵人的防護盾', lucky: false, action: () => { player.shield += 2; } },
-                { id: 'speed', title: '動能靴 (+25% 速度)', desc: '提升機體移動速度', lucky: false, action: () => { player.speed *= 1.25; } }
+                { id: 'speed', title: '動能靴 (+25% 速度)', desc: '提升機體移動速度', lucky: false, action: () => { player.speed *= 1.25; } },
+                { id: 'overdrive', title: '核心過載 (+40% 傷害/射速)', desc: '發射頻率與威力大幅提升，但熱能累積速度增加 25%', lucky: false, action: () => { player.bulletDamage *= 1.4; player.fireRate = Math.max(40, player.fireRate * 0.8); player.heatMult *= 1.25; } },
+                { id: 'nano_armor', title: '奈米裝甲 (+300 HP)', desc: '上限提升 300，並立即恢復 300 HP', lucky: false, action: () => { player.maxHp += 300; player.hp = Math.min(player.maxHp, player.hp + 300); } },
+                { id: 'extra_turret', title: '微型戰術塔 (+5 座)', desc: '防禦塔放置上限增加 5 座', lucky: false, action: () => { player.maxTurretBonus += 5; } },
+                { id: 'credit_boost', title: '戰術點數採集器', desc: '擊殺敵人獲得的戰術點數提升 +50%', lucky: false, action: () => { player.creditMult += 0.5; } }
             ];
 
             const luckyUpgrades = [
                 { id: 'lucky_damage', title: '星核過載 (+500% 傷害)', desc: '【幸運】武器獲得狂暴級爆破加成', lucky: true, action: () => { player.bulletDamage *= 6; } },
                 { id: 'lucky_360', title: '360° 萬向彈幕', desc: '【幸運】射擊轉化為全方位 360 度環狀散射', lucky: true, action: () => { player.is360Shot = true; } },
-                { id: 'lucky_gravity', title: '黑洞引力彈', desc: '【幸運】子彈附帶強烈吸引力牽引敵軍', lucky: true, action: () => { player.gravityBullet = true; } }
+                { id: 'lucky_gravity', title: '黑洞引力彈', desc: '【幸運】子彈附帶強烈吸引力牽引敵軍', lucky: true, action: () => { player.gravityBullet = true; } },
+                { id: 'lucky_cannon', title: '脈衝巨砲', desc: '【幸運】子彈半徑翻倍，擊退效果大幅提升', lucky: true, action: () => { player.bulletSizeMult *= 2.0; player.knockback *= 2.5; } },
+                { id: 'lucky_vampire', title: '生命吸取矩陣', desc: '【幸運】每次擊殺敵人恢復 12 點生命', lucky: true, action: () => { player.lifesteal += 12; } }
             ];
 
             const availableLucky = luckyUpgrades.filter(u => !acquiredLuckyUpgrades.has(u.id));
             const choices = [];
 
             for (let i = 0; i < 3; i++) {
-                if (Math.random() < 0.01 && availableLucky.length > 0) { // 1% 機率幸運
+                if (Math.random() < 0.08 && availableLucky.length > 0) { // 8% 機率幸運
                     const lIdx = Math.floor(Math.random() * availableLucky.length);
                     choices.push(availableLucky.splice(lIdx, 1)[0]);
                 } else {
@@ -1533,7 +1652,7 @@
 
             // 繪製子彈
             bullets.forEach(b => {
-                ctx.save();
+              ctx.save();
                 ctx.shadowBlur = b.isGravity ? 15 : 8;
                 ctx.shadowColor = b.color;
                 ctx.fillStyle = b.color;
